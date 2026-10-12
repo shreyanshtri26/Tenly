@@ -12,7 +12,7 @@ export function SignOutButton() {
     <button
       type="button"
       disabled={pending}
-      className="rounded-md border px-3 py-1 text-sm hover:bg-secondary disabled:opacity-50"
+      className="rounded-md border border-primary/40 px-3 py-1 text-sm text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
       onClick={async () => {
         setPending(true);
         const { signOut } = await import("@/lib/auth-client");

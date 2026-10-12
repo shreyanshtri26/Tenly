@@ -5,44 +5,48 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Palette: rich black, muted gold and blush pink. Dark is the default; light
+   mode is warm ivory with a deeper gold so text stays readable on it. */
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.62 0.17 152);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --background: #0b0b0d;
+  --foreground: #f5efe6;
+  --card: #141418;
+  --card-foreground: #f5efe6;
+  --primary: #d4b06a;
+  --primary-foreground: #0b0b0d;
+  --secondary: #1d1d23;
+  --secondary-foreground: #f5efe6;
+  --muted: #1d1d23;
+  --muted-foreground: #a69e92;
+  --accent: #f2c4c4;
+  --accent-foreground: #0b0b0d;
+  --destructive: #e5736b;
+  --border: #2a2a31;
+  --input: #2a2a31;
+  --ring: #c9a96e;
+  --gold-soft: #c9a96e33;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.7 0.16 152);
-    --accent-foreground: oklch(0.145 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --background: #fbf7f2;
+    --foreground: #17130f;
+    --card: #fffdfa;
+    --card-foreground: #17130f;
+    --primary: #8f6d2f;
+    --primary-foreground: #fffdfa;
+    --secondary: #f3ebe3;
+    --secondary-foreground: #17130f;
+    --muted: #f3ebe3;
+    --muted-foreground: #6f655a;
+    --accent: #e8a7ad;
+    --accent-foreground: #17130f;
+    --destructive: #b4443d;
+    --border: #e6dccf;
+    --input: #e6dccf;
+    --ring: #b89b5e;
+    --gold-soft: #b89b5e33;
   }
 }
 

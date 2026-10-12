@@ -118,3 +118,9 @@ export async function requireSuperAdminPage() {
   if (!row?.isSuperAdmin) notFound();
   return user;
 }
+
+/** Whether a user is a platform super admin. Cached per request. */
+export const isSuperAdminUser = cache(async (userId: string) => {
+  const row = await prisma.user.findUnique({ where: { id: userId }, select: { isSuperAdmin: true } });
+  return row?.isSuperAdmin ?? false;
+});
