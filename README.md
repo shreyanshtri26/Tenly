@@ -5,7 +5,7 @@
 Tenly gives a product the parts every B2B SaaS needs (organizations, invites, roles, paid plans, usage limits and an audit log) and exposes them through an **MCP server**, so Claude, Cursor and other agents can manage an organization through the same permission checks as the web app.
 
 [![CI](https://github.com/shreyanshtri26/Tenly/actions/workflows/ci.yml/badge.svg)](https://github.com/shreyanshtri26/Tenly/actions/workflows/ci.yml)
-&nbsp;Live demo: `https://tenly.vercel.app` _(deploying soon)_
+&nbsp;Live demo: `https://tenly-ai.vercel.app`
 
 ---
 
@@ -197,7 +197,7 @@ Claude Desktop (`claude_desktop_config.json`):
     "tenly": {
       "command": "npx",
       "args": [
-        "-y", "mcp-remote", "https://tenly.vercel.app/api/mcp",
+        "-y", "mcp-remote", "https://tenly-ai.vercel.app/api/mcp",
         "--header", "Authorization: Bearer ${TENLY_API_KEY}"
       ],
       "env": { "TENLY_API_KEY": "tnly_xxxxxxxx_..." }
