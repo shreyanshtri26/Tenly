@@ -7,6 +7,12 @@ import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { signIn, signUp } from "@/lib/auth-client";
 
+// Where to go after signing in: the ?next= path if it is one of ours, else the dashboard.
+function nextPath(): string {
+  const next = new URLSearchParams(window.location.search).get("next");
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+}
+
 export default function SignInPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
@@ -31,7 +37,7 @@ export default function SignInPage() {
       setError(result.error.message ?? "Something went wrong");
       return;
     }
-    router.push("/dashboard");
+    router.push(nextPath());
   }
 
   return (
@@ -60,7 +66,7 @@ export default function SignInPage() {
         <Button
           variant="outline"
           className="mt-3 w-full"
-          onClick={() => signIn.social({ provider: "google", callbackURL: "/dashboard" })}
+          onClick={() => signIn.social({ provider: "google", callbackURL: nextPath() })}
         >
           Continue with Google
         </Button>

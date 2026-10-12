@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -32,9 +33,13 @@ async function OrgList() {
     return (
       <Card className="mt-6">
         <CardTitle>No organizations yet</CardTitle>
-        <CardDescription className="mt-2">
-          Week 2 of the roadmap adds the &ldquo;Create organization&rdquo; flow here.
-        </CardDescription>
+        <CardDescription className="mt-2">Create one, or accept an invite from a teammate.</CardDescription>
+        <Link
+          href="/orgs/new"
+          className="mt-4 inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          Create organization
+        </Link>
       </Card>
     );
   }
@@ -42,12 +47,14 @@ async function OrgList() {
   return (
     <div className="mt-6 grid gap-4 sm:grid-cols-2">
       {memberships.map(({ org, role }) => (
-        <Card key={org.id}>
-          <CardTitle>{org.name}</CardTitle>
-          <CardDescription className="mt-2">
-            {PLANS[org.plan].name} plan · You are {role.toLowerCase()}
-          </CardDescription>
-        </Card>
+        <Link key={org.id} href={`/orgs/${org.slug}`} className="block">
+          <Card className="h-full transition-colors hover:bg-secondary/50">
+            <CardTitle>{org.name}</CardTitle>
+            <CardDescription className="mt-2">
+              {PLANS[org.plan].name} plan · You are {role.toLowerCase()}
+            </CardDescription>
+          </Card>
+        </Link>
       ))}
     </div>
   );

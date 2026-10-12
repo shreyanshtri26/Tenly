@@ -55,11 +55,11 @@ Tenly gives a product the parts every B2B SaaS needs (organizations, invites, ro
 | MCP server at `/api/mcp` with 5 tools and org-scoped API keys | ✅ |
 | "Ask Tenly" assistant API with Gemini → Groq fallback and rate limits | ✅ |
 | Invite emails sent after the response (Gmail SMTP) | ✅ |
-| Create-organization flow and org dashboard UI | 🚧 Week 2 |
-| Accept-invite page, member management, role changes | 🚧 Week 2 |
-| Razorpay checkout, upgrade, downgrade and cancel UI | 🚧 Week 3 |
-| API key management UI and audit log viewer | 🚧 Week 4 |
-| Assistant chat UI | 🚧 Week 4 |
+| Create-organization flow and org dashboard (projects, usage) | ✅ |
+| Invites (accept page, expiry, revoke), member management, role changes, audit-logged | ✅ |
+| Razorpay checkout (hosted, test mode), cancel at period end; needs test-mode keys and plan IDs | ✅ |
+| API key management UI (shown once, revocable) and audit log viewer | ✅ |
+| Assistant chat UI | ✅ |
 | OAuth for MCP clients (one-click connect instead of API keys) | 🚧 Week 5 |
 
 ## Architecture

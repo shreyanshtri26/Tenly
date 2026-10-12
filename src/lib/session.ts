@@ -1,5 +1,6 @@
 import "server-only";
 import type { Plan, Role } from "@/generated/prisma/enums";
+import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { NotFoundError, UnauthorizedError } from "@/lib/errors";
@@ -26,17 +27,21 @@ export async function getSessionUser() {
   const { data } = await auth.getSession();
   const user = data?.user;
   if (!user) return null;
-  await prisma.user.upsert({
-    where: { id: user.id },
-    update: {},
-    create: {
-      id: user.id,
-      name: user.name ?? user.email,
-      email: user.email,
-      emailVerified: user.emailVerified ?? false,
-      image: user.image ?? null,
-    },
-  });
+  // Several requests can arrive at once for a new user. createMany with
+  // skipDuplicates is race-safe, unlike upsert, which can fail on the unique id.
+  const known = await prisma.user.findUnique({ where: { id: user.id }, select: { id: true } });
+  if (!known) {
+    await prisma.user.createMany({
+      data: {
+        id: user.id,
+        name: user.name ?? user.email,
+        email: user.email,
+        emailVerified: user.emailVerified ?? false,
+        image: user.image ?? null,
+      },
+      skipDuplicates: true,
+    });
+  }
   return user;
 }
 
@@ -87,4 +92,15 @@ export async function listUserOrgs(userId: string) {
     include: { org: { select: { id: true, name: true, slug: true, plan: true } } },
     orderBy: { createdAt: "asc" },
   });
+}
+
+/** For pages under /orgs/[slug]: redirects to sign-in or 404s instead of throwing. */
+export async function requireOrgPage(slug: string): Promise<OrgContext> {
+  try {
+    return await requireOrgContext(slug);
+  } catch (error) {
+    if (error instanceof UnauthorizedError) redirect(`/sign-in?next=${encodeURIComponent(`/orgs/${slug}`)}`);
+    if (error instanceof NotFoundError) notFound();
+    throw error;
+  }
 }

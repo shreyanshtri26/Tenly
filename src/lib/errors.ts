@@ -30,6 +30,12 @@ export class NotFoundError extends AppError {
   }
 }
 
+export class BadRequestError extends AppError {
+  constructor(message: string) {
+    super(message, 400, "bad_request");
+  }
+}
+
 export class LimitExceededError extends AppError {
   constructor(message: string) {
     super(message, 402, "plan_limit_exceeded");
