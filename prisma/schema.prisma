@@ -1,7 +1,8 @@
 // Tenly data model.
 //
 // Two groups of tables:
-//   1. Auth tables (User, Session, Account, Verification) - owned by Better Auth.
+//   1. Identity - User mirrors the user record from Neon Auth (same id). Login,
+//      sessions and passwords are owned by Neon Auth, not by this database.
 //   2. Tenant tables - every row belongs to exactly one Organization via `orgId`.
 //      Never query a tenant table without an orgId. Use `forOrg(orgId)` from
 //      src/lib/tenant.ts, which adds the filter for you.
@@ -16,7 +17,7 @@ datasource db {
 }
 
 // ---------------------------------------------------------------------------
-// Auth (Better Auth core schema)
+// Identity (login lives in Neon Auth; see src/lib/session.ts)
 // ---------------------------------------------------------------------------
 
 model User {
@@ -28,58 +29,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  sessions    Session[]
-  accounts    Account[]
   memberships Membership[]
 
   @@map("user")
-}
-
-model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("session")
-}
-
-model Account {
-  id                    String    @id
-  accountId             String
-  providerId            String
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  @@index([userId])
-  @@map("account")
-}
-
-model Verification {
-  id         String   @id
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@index([identifier])
-  @@map("verification")
 }
 
 // ---------------------------------------------------------------------------

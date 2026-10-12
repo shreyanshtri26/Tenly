@@ -137,7 +137,7 @@ export const inviteMember = defineTool({
     });
 
     // Send the email after the response is returned, so the request stays fast.
-    const acceptUrl = `${env.BETTER_AUTH_URL}/invite/${token}`;
+    const acceptUrl = `${env.APP_URL}/invite/${token}`;
     // Trade-off: a failed send is logged but not retried (no queue on purpose).
     after(() =>
       sendEmail({ to: email, ...inviteEmail({ orgName: ctx.orgName, inviterName: "A teammate", acceptUrl }) }).catch(

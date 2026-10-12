@@ -8,8 +8,11 @@ import { z } from "zod";
 // gracefully when unset so the app still runs locally with only a database.
 const schema = z.object({
   DATABASE_URL: z.string().url(),
-  BETTER_AUTH_SECRET: z.string().min(32, "Generate one with: openssl rand -base64 32"),
-  BETTER_AUTH_URL: z.string().url().default("http://localhost:3000"),
+  // Neon Auth (Auth URL from the Neon console, Settings > Better Auth > Project Info).
+  NEON_AUTH_BASE_URL: z.string().url(),
+  NEON_AUTH_COOKIE_SECRET: z.string().min(32, "Generate one with: openssl rand -base64 32"),
+  // Public address of this app, used to build links in emails.
+  APP_URL: z.string().url().default("http://localhost:3000"),
 
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
@@ -41,7 +44,8 @@ function load(): Env {
     process.env.SKIP_ENV_VALIDATION === "1"
       ? {
           DATABASE_URL: "postgresql://build:build@localhost:5432/build",
-          BETTER_AUTH_SECRET: "build-time-placeholder-secret-0123456789",
+          NEON_AUTH_BASE_URL: "https://build.neonauth.example.com/neondb/auth",
+          NEON_AUTH_COOKIE_SECRET: "build-time-placeholder-secret-0123456789",
           ...process.env,
         }
       : process.env;

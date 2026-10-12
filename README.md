@@ -46,7 +46,7 @@ Tenly gives a product the parts every B2B SaaS needs (organizations, invites, ro
 
 | Feature | Status |
 |---|---|
-| Email/password and Google sign-in (Better Auth) | ✅ |
+| Email/password and Google sign-in (Neon Auth) | ✅ |
 | Data model: orgs, memberships, invites, projects, subscriptions, usage, audit log, API keys | ✅ |
 | Automatic tenant scoping of every query on tenant tables | ✅ |
 | Owner / Admin / Member permission table; no one can grant a role above their own | ✅ |
@@ -97,7 +97,7 @@ Every service has a free tier that needs **no credit card**.
 | Framework | Next.js 16 (App Router, Cache Components), TypeScript | One deployable for UI, API routes and the MCP endpoint |
 | UI | Tailwind CSS v4, shadcn/ui-style components | Accessible primitives, tokens in one CSS file |
 | Database | Neon PostgreSQL + Prisma 7 (Neon driver adapter) | Serverless Postgres that scales to zero; typed queries |
-| Auth | Better Auth (email/password, Google) | Open source and stable. Authorization is Tenly's own code, not a plugin |
+| Auth | Neon Auth (email/password, Google) | Managed by Neon, users in the same Postgres project. Authorization is Tenly's own code |
 | Payments | Razorpay (test mode) | Indian payment gateway with subscriptions and signed webhooks |
 | Email | Nodemailer + Gmail SMTP | Free, no domain needed; console output in development |
 | Rate limiting | Upstash Redis | Counters shared across serverless instances |
@@ -128,7 +128,7 @@ src/
     sign-in/             Email/password and Google sign-in
     dashboard/           Organization list (streams in behind <Suspense>)
     api/
-      auth/[...all]/     Better Auth handler
+      auth/[...path]/     Neon Auth handler
       mcp/               MCP server (Streamable HTTP, API-key auth)
       assistant/         "Ask Tenly" (LLM + the same tools)
       webhooks/razorpay/ Signed, idempotent subscription webhook
@@ -161,7 +161,7 @@ SKILL.md                 Engineering log: decisions, numbers, bugs, interview an
 git clone https://github.com/shreyanshtri26/Tenly.git
 cd Tenly
 pnpm install                 # also generates the Prisma client
-cp .env.example .env         # then fill in DATABASE_URL, DIRECT_URL, BETTER_AUTH_SECRET
+cp .env.example .env         # then fill in DATABASE_URL, DIRECT_URL, NEON_AUTH_BASE_URL, NEON_AUTH_COOKIE_SECRET
 pnpm db:migrate              # creates the tables in Neon (name the first migration "init")
 pnpm dev                     # http://localhost:3000
 ```
@@ -221,7 +221,7 @@ The tests cover the rules that must never break: tenant isolation, role checks, 
 ## Deployment
 
 1. Import the repo in [Vercel](https://vercel.com/new) (Hobby plan, sign in with GitHub, no card).
-2. Add the environment variables from `.env.example`. Set `BETTER_AUTH_URL` to your Vercel URL.
+2. Add the environment variables from `.env.example`. Set `APP_URL` to your Vercel URL.
 3. Run migrations against Neon from your machine: `pnpm db:deploy`.
 4. In Google Cloud, add `https://<your-app>.vercel.app/api/auth/callback/google` as a redirect URI.
 

@@ -1,5 +1,4 @@
 import "server-only";
-import { headers } from "next/headers";
 import type { Plan, Role } from "@/generated/prisma/enums";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -21,9 +20,24 @@ export type OrgContext = {
   db: TenantDb;
 };
 
+// Neon Auth owns the login. Tenly keeps its own User row (same id) so that
+// memberships and other tenant data can reference it with real foreign keys.
 export async function getSessionUser() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  return session?.user ?? null;
+  const { data } = await auth.getSession();
+  const user = data?.user;
+  if (!user) return null;
+  await prisma.user.upsert({
+    where: { id: user.id },
+    update: {},
+    create: {
+      id: user.id,
+      name: user.name ?? user.email,
+      email: user.email,
+      emailVerified: user.emailVerified ?? false,
+      image: user.image ?? null,
+    },
+  });
+  return user;
 }
 
 export async function requireUser() {

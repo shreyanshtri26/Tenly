@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { PLANS } from "@/lib/plans";
@@ -20,6 +21,8 @@ export default function DashboardPage() {
 }
 
 async function OrgList() {
+  // Wait for a real request before reading cookies, so the build does not prerender this part.
+  await connection();
   const user = await getSessionUser();
   if (!user) redirect("/sign-in");
 

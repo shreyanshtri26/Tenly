@@ -44,7 +44,7 @@ Components:
 - `tools.ts` → every business operation, defined once → the UI, MCP server and assistant cannot drift apart
 - `forOrg()` Prisma extension → tenant scoping → enforced centrally instead of remembered per query
 - Neon PostgreSQL → system of record → relational constraints (unique keys, foreign keys) do real work: idempotency and membership integrity
-- Better Auth → authentication only → authorization stays in Tenly's own code, which is the part worth explaining
+- Neon Auth → authentication only → authorization stays in Tenly's own code, which is the part worth explaining
 - Upstash Redis → rate-limit counters → shared across serverless instances; an in-memory counter would reset per instance
 - Gemini / Groq → assistant LLM → both free with no card; fallback keeps the demo working when one is rate-limited
 
@@ -53,7 +53,7 @@ Components:
 | Decision | Options I considered | What I chose | Why | What I gave up |
 |---|---|---|---|---|
 | Tenant isolation | `where orgId` in every query; Postgres row-level security; Prisma client extension | Prisma extension (`forOrg`) | Central, testable, works with Neon's serverless driver without session variables | Nested relation queries are not rewritten; RLS would be stronger |
-| Authentication library | Auth.js v5 (still beta); Better Auth; Clerk | Better Auth | Stable, open source, data in my own Postgres, no vendor limits | Fewer tutorials than Auth.js; a second library to learn |
+| Authentication library | Auth.js v5 (still beta); Better Auth (stable, open source); Clerk | Neon Auth (beta) | Managed by Neon in the same project as the database, no auth server to run, Google provider configured in the console | Beta API that may change; Google and user management depend on Neon's console; less control than running Better Auth myself |
 | Background email | pg-boss queue; Upstash QStash; Next.js `after()` | `after()` | No worker process to host on serverless; one less service | No automatic retry on failure |
 | Webhook idempotency | Check-then-insert; Redis lock; unique primary key in the same transaction | Unique key in the same transaction | The database guarantees it, even under concurrent retries | One extra row per event |
 | MCP authentication | OAuth 2.1; org-scoped API keys | API keys first, OAuth later | Ships the MCP server in a week; keys are hashed and scoped to a role | Users paste a key instead of one-click connect |
