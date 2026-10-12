@@ -14,7 +14,8 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "admin:grant": "node --env-file=.env scripts/grant-super-admin.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.93",

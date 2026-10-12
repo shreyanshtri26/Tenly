@@ -7,5 +7,5 @@ import { auth } from "@/lib/auth";
 export default auth.middleware({ loginUrl: "/sign-in" });
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/orgs/:path*"],
+  matcher: ["/dashboard/:path*", "/orgs/:path*", "/admin/:path*"],
 };

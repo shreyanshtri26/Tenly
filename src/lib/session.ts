@@ -104,3 +104,15 @@ export async function requireOrgPage(slug: string): Promise<OrgContext> {
     throw error;
   }
 }
+
+/**
+ * For /admin pages: only super admins get in. Everyone else gets a 404, so the
+ * admin area does not reveal that it exists.
+ */
+export async function requireSuperAdminPage() {
+  const user = await getSessionUser();
+  if (!user) redirect(`/sign-in?next=${encodeURIComponent("/admin")}`);
+  const row = await prisma.user.findUnique({ where: { id: user.id }, select: { isSuperAdmin: true } });
+  if (!row?.isSuperAdmin) notFound();
+  return user;
+}
