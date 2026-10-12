@@ -5,7 +5,7 @@ level: intermediate
 started: 2026-10-12
 shipped: <YYYY-MM-DD>
 repo: https://github.com/shreyanshtri26/Tenly
-live: https://tenly.vercel.app
+live: https://tenly-virid.vercel.app
 ---
 
 > **How to use this file.** This is the engineering log from _The Resume Project
