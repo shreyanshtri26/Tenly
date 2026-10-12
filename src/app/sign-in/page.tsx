@@ -1,84 +1,21 @@
-"use client";
+import { redirect } from "next/navigation";
+import { connection } from "next/server";
+import { auth } from "@/lib/auth";
+import { SignInForm } from "./sign-in-form";
 
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { signIn, signUp } from "@/lib/auth-client";
+export const metadata = { title: "Sign in" };
 
-// Where to go after signing in: the ?next= path if it is one of ours, else the dashboard.
-function nextPath(): string {
-  const next = new URLSearchParams(window.location.search).get("next");
+// Only same-site paths. Anything else falls back to the dashboard.
+function safeNext(next: string | undefined): string {
   return next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
 }
 
-export default function SignInPage() {
-  const router = useRouter();
-  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
-
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setPending(true);
-    const form = new FormData(event.currentTarget);
-    const email = String(form.get("email"));
-    const password = String(form.get("password"));
-
-    const result =
-      mode === "sign-in"
-        ? await signIn.email({ email, password })
-        : await signUp.email({ email, password, name: String(form.get("name") || email.split("@")[0]) });
-
-    setPending(false);
-    if (result.error) {
-      setError(result.error.message ?? "Something went wrong");
-      return;
-    }
-    router.push(nextPath());
-  }
-
-  return (
-    <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-4 py-16">
-      <Card>
-        <CardTitle className="text-xl">{mode === "sign-in" ? "Sign in to Tenly" : "Create your account"}</CardTitle>
-        <CardDescription className="mt-1">Use email and password, or continue with Google.</CardDescription>
-
-        <form onSubmit={onSubmit} className="mt-6 space-y-3">
-          {mode === "sign-up" && <Input name="name" placeholder="Your name" autoComplete="name" />}
-          <Input name="email" type="email" placeholder="you@example.com" required autoComplete="email" />
-          <Input
-            name="password"
-            type="password"
-            placeholder="Password (8+ characters)"
-            minLength={8}
-            required
-            autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
-          />
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}
-          </Button>
-        </form>
-
-        <Button
-          variant="outline"
-          className="mt-3 w-full"
-          onClick={() => signIn.social({ provider: "google", callbackURL: nextPath() })}
-        >
-          Continue with Google
-        </Button>
-
-        <button
-          type="button"
-          className="mt-4 w-full text-center text-sm text-muted-foreground hover:text-foreground"
-          onClick={() => setMode(mode === "sign-in" ? "sign-up" : "sign-in")}
-        >
-          {mode === "sign-in" ? "New here? Create an account" : "Have an account? Sign in"}
-        </button>
-      </Card>
-    </main>
-  );
+// A signed-in visitor (for example, just back from Google) goes straight on
+// to the page they came for, instead of seeing the sign-in form again.
+export default async function SignInPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  await connection();
+  const { next } = await searchParams;
+  const { data } = await auth.getSession();
+  if (data?.user) redirect(safeNext(next));
+  return <SignInForm />;
 }
