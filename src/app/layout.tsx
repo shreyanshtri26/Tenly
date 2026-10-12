@@ -1,6 +1,8 @@
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { AppHeader } from "@/components/app-header";
 import "./globals.css";
 
 // Geist is self-hosted from the `geist` package, so builds never depend on
@@ -15,7 +17,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} h-full`}>
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        <Suspense fallback={null}>
+          <AppHeader />
+        </Suspense>
+        {children}
+      </body>
     </html>
   );
 }
