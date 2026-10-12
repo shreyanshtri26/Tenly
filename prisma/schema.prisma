@@ -1,0 +1,250 @@
+// Tenly data model.
+//
+// Two groups of tables:
+//   1. Auth tables (User, Session, Account, Verification) - owned by Better Auth.
+//   2. Tenant tables - every row belongs to exactly one Organization via `orgId`.
+//      Never query a tenant table without an orgId. Use `forOrg(orgId)` from
+//      src/lib/tenant.ts, which adds the filter for you.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Auth (Better Auth core schema)
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions    Session[]
+  accounts    Account[]
+  memberships Membership[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy
+// ---------------------------------------------------------------------------
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum Plan {
+  FREE
+  PRO
+  TEAM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  plan      Plan     @default(FREE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships  Membership[]
+  invites      Invite[]
+  projects     Project[]
+  subscription Subscription?
+  usage        UsageCounter[]
+  auditLogs    AuditLog[]
+  apiKeys      ApiKey[]
+
+  @@map("organization")
+}
+
+model Membership {
+  id        String       @id @default(cuid())
+  orgId     String
+  userId    String
+  role      Role         @default(MEMBER)
+  createdAt DateTime     @default(now())
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, userId])
+  @@index([userId])
+  @@map("membership")
+}
+
+// Invite links carry a random token. Only its SHA-256 hash is stored, so a
+// database leak cannot be turned into working invite links.
+model Invite {
+  id          String       @id @default(cuid())
+  orgId       String
+  email       String
+  role        Role         @default(MEMBER)
+  tokenHash   String       @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  invitedById String
+  createdAt   DateTime     @default(now())
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@map("invite")
+}
+
+// The sample tenant-owned resource. Its count is metered per plan.
+model Project {
+  id          String       @id @default(cuid())
+  orgId       String
+  name        String
+  description String?
+  createdById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@map("project")
+}
+
+// ---------------------------------------------------------------------------
+// Billing, metering and audit
+// ---------------------------------------------------------------------------
+
+model Subscription {
+  id                     String             @id @default(cuid())
+  orgId                  String             @unique
+  plan                   Plan
+  status                 SubscriptionStatus @default(INCOMPLETE)
+  razorpaySubscriptionId String?            @unique
+  currentPeriodEnd       DateTime?
+  cancelAtPeriodEnd      Boolean            @default(false)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  org                    Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@map("subscription")
+}
+
+// One row per (org, metric, period). Incremented atomically with upsert.
+model UsageCounter {
+  id          String       @id @default(cuid())
+  orgId       String
+  metric      String
+  periodStart DateTime
+  count       Int          @default(0)
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, metric, periodStart])
+  @@map("usage_counter")
+}
+
+model AuditLog {
+  id          String       @id @default(cuid())
+  orgId       String
+  actorUserId String?
+  action      String
+  targetType  String?
+  targetId    String?
+  metadata    Json?
+  createdAt   DateTime     @default(now())
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@map("audit_log")
+}
+
+// Idempotency ledger for payment webhooks. The provider's event id is the
+// primary key, so a retried delivery fails the insert and is skipped.
+model WebhookEvent {
+  id          String    @id
+  provider    String
+  type        String
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+
+  @@map("webhook_event")
+}
+
+// Org-scoped API keys used as Bearer tokens by MCP clients.
+// Only the SHA-256 hash is stored; the full key is shown once at creation.
+model ApiKey {
+  id          String       @id @default(cuid())
+  orgId       String
+  name        String
+  prefix      String
+  keyHash     String       @unique
+  role        Role         @default(MEMBER)
+  createdById String
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime     @default(now())
+  org         Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@map("api_key")
+}
