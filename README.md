@@ -170,7 +170,7 @@ Only the first block of `.env.example` is required. Each optional integration sw
 
 | Without… | What happens |
 |---|---|
-| Google keys | Email/password sign-in still works |
+| Your own Google OAuth client | Google sign-in uses Neon's shared development credentials, for local testing only (see [Google sign-in](#google-sign-in)) |
 | Gmail App Password | Emails are printed to the terminal |
 | Upstash | Rate limits are skipped (warning logged in production) |
 | Gemini and Groq keys | The assistant returns `503 assistant_not_configured` |
@@ -223,7 +223,24 @@ The tests cover the rules that must never break: tenant isolation, role checks, 
 1. Import the repo in [Vercel](https://vercel.com/new) (Hobby plan, sign in with GitHub, no card).
 2. Add the environment variables from `.env.example`. Set `APP_URL` to your Vercel URL.
 3. Run migrations against Neon from your machine: `pnpm db:deploy`.
-4. In Google Cloud, add `https://<your-app>.vercel.app/api/auth/callback/google` as a redirect URI.
+4. Set up your own Google OAuth client for production (see [Google sign-in](#google-sign-in)).
+
+## Google sign-in
+
+Google sign-in is provided by Neon Auth. The sign-in button calls `signIn.social({ provider: "google" })`, and Neon handles the Google login.
+
+- **Local development:** works with Neon's shared Google credentials. No setup needed. Localhost is already allowed on this project (`allow_localhost`).
+- **Production:** create an OAuth client in [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (type: Web application). Add this authorized redirect URI:
+  `https://<your-neon-auth-host>/neondb/auth/callback/google`
+  The host is the `NEON_AUTH_BASE_URL` value without the `/neondb/auth` path. Then give Neon the client ID and secret, and add your app URL as a trusted domain:
+
+```bash
+neon neon-auth oauth-provider list --project-id nameless-union-92145698
+neon neon-auth oauth-provider update --provider-id google --oauth-client-id <ID> --oauth-client-secret <SECRET> --project-id nameless-union-92145698
+neon neon-auth domain add https://tenly-ai.vercel.app --project-id nameless-union-92145698
+```
+
+Users who sign in with Google get a Tenly `User` row the first time they reach the app, the same as email sign-in.
 
 ## Roadmap
 
