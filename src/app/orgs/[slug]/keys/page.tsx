@@ -1,6 +1,6 @@
+import { SubmitButton } from "@/components/submit-button";
 import { connection } from "next/server";
 import { ErrorNotice, OrgNav } from "@/components/org-nav";
-import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { hasFeature, PLANS } from "@/lib/plans";
 import { can } from "@/lib/rbac";
@@ -80,9 +80,9 @@ export default async function KeysPage({
                 ) : (
                   <form action={revokeApiKeyAction.bind(null, slug)}>
                     <input type="hidden" name="id" value={key.id} />
-                    <Button type="submit" variant="ghost" size="sm" className="text-destructive">
+                    <SubmitButton variant="ghost" size="sm" className="text-destructive">
                       Revoke
-                    </Button>
+                    </SubmitButton>
                   </form>
                 )}
               </li>

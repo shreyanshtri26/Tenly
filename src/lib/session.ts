@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import type { Plan, Role } from "@/generated/prisma/enums";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -23,7 +24,8 @@ export type OrgContext = {
 
 // Neon Auth owns the login. Tenly keeps its own User row (same id) so that
 // memberships and other tenant data can reference it with real foreign keys.
-export async function getSessionUser() {
+// Cached per request: the header, the page and its helpers share one session lookup.
+export const getSessionUser = cache(async () => {
   const { data } = await auth.getSession();
   const user = data?.user;
   if (!user) return null;
@@ -43,7 +45,7 @@ export async function getSessionUser() {
     });
   }
   return user;
-}
+});
 
 export async function requireUser() {
   const user = await getSessionUser();

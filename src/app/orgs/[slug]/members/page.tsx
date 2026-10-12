@@ -1,6 +1,6 @@
+import { SubmitButton } from "@/components/submit-button";
 import { connection } from "next/server";
 import { ErrorNotice, OrgNav, selectClassName } from "@/components/org-nav";
-import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { canAssignRole, can, type Permission } from "@/lib/rbac";
@@ -73,9 +73,9 @@ export default async function MembersPage({
                           </option>
                         ))}
                       </select>
-                      <Button type="submit" variant="outline" size="sm">
+                      <SubmitButton variant="outline" size="sm">
                         Save
-                      </Button>
+                      </SubmitButton>
                     </form>
                   ) : (
                     <span className="rounded-md bg-secondary px-2 py-1 text-xs">{member.role.toLowerCase()}</span>
@@ -83,9 +83,9 @@ export default async function MembersPage({
                   {canRemove && (
                     <form action={removeMemberAction.bind(null, slug)}>
                       <input type="hidden" name="membershipId" value={member.id} />
-                      <Button type="submit" variant="ghost" size="sm" className="text-destructive">
+                      <SubmitButton variant="ghost" size="sm" className="text-destructive">
                         Remove
-                      </Button>
+                      </SubmitButton>
                     </form>
                   )}
                 </div>
@@ -111,9 +111,9 @@ export default async function MembersPage({
                     </option>
                   ))}
               </select>
-              <Button type="submit" className="w-full">
+              <SubmitButton className="w-full">
                 Send invite
-              </Button>
+              </SubmitButton>
             </form>
           </Card>
 
@@ -130,9 +130,9 @@ export default async function MembersPage({
                     </span>
                     <form action={revokeInviteAction.bind(null, slug)}>
                       <input type="hidden" name="inviteId" value={invite.id} />
-                      <Button type="submit" variant="ghost" size="sm">
+                      <SubmitButton variant="ghost" size="sm">
                         Revoke
-                      </Button>
+                      </SubmitButton>
                     </form>
                   </li>
                 ))}

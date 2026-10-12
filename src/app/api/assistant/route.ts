@@ -1,4 +1,4 @@
-import { generateText, stepCountIs, tool, type ToolSet } from "ai";
+import { streamText, stepCountIs, tool, type ToolSet } from "ai";
 import { z } from "zod";
 import { AppError, toHttpResponse } from "@/lib/errors";
 import { availableModels } from "@/lib/llm";
@@ -8,13 +8,14 @@ import { TOOLS } from "@/lib/tools";
 import { assertWithinLimit, incrementDaily } from "@/lib/usage";
 
 // "Ask Tenly": an in-app assistant that uses the SAME tools as the MCP server.
-// It lets a visitor see MCP-style tool calling work without installing an
-// MCP client.
+// The answer is streamed as plain text, so the first words appear while the
+// rest is still being written.
 //
 // Cost control on free LLM tiers:
 //  - per-user rate limit (Upstash) and a per-org daily plan limit,
 //  - at most 5 model steps per question,
-//  - provider fallback: Gemini first, then Groq.
+//  - provider fallback: Gemini first, then Groq. A provider is skipped only if
+//    it fails before producing any text, so the user never sees a broken reply.
 
 const body = z.object({
   orgSlug: z.string().min(1),
@@ -70,25 +71,48 @@ export async function POST(request: Request) {
       `The user's role is ${ctx.role}. Use the tools to answer; never invent data. ` +
       "Before calling a tool that changes data, confirm the details with the user in one short question.";
 
+    const encoder = new TextEncoder();
     let lastError: unknown;
     for (const { provider, model } of models) {
+      const result = streamText({
+        model,
+        system,
+        messages,
+        tools: toolsFor(ctx),
+        stopWhen: stepCountIs(5),
+      });
+      const chunks = result.textStream[Symbol.asyncIterator]();
       try {
-        const result = await generateText({
-          model,
-          system,
-          messages,
-          tools: toolsFor(ctx),
-          stopWhen: stepCountIs(5),
+        // Waiting for the first piece of text is what makes the fallback safe:
+        // a provider that fails here has produced nothing the user has seen.
+        const first = await chunks.next();
+        const stream = new ReadableStream<Uint8Array>({
+          async start(controller) {
+            try {
+              if (!first.done) controller.enqueue(encoder.encode(first.value));
+              for (;;) {
+                const next = await chunks.next();
+                if (next.done) break;
+                controller.enqueue(encoder.encode(next.value));
+              }
+              await incrementDaily(ctx.db, ctx.orgId, "assistant_messages");
+              controller.close();
+            } catch (error) {
+              console.error(`[assistant] ${provider} failed mid-answer`, error);
+              controller.error(error);
+            }
+          },
         });
-        await incrementDaily(ctx.db, ctx.orgId, "assistant_messages");
-        return Response.json({ provider, text: result.text });
+        return new Response(stream, {
+          headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Assistant-Provider": provider },
+        });
       } catch (error) {
         lastError = error;
         console.warn(`[assistant] ${provider} failed, trying next provider`, error);
       }
     }
     console.error("[assistant] all providers failed", lastError);
-    return Response.json({ error: "assistant_unavailable" }, { status: 502 });
+    return Response.json({ error: "assistant_unavailable", message: "The assistant is unavailable right now. Try again in a moment." }, { status: 502 });
   } catch (error) {
     return toHttpResponse(error);
   }

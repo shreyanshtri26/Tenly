@@ -1,8 +1,8 @@
 "use client";
 
+import { SubmitButton } from "@/components/submit-button";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
@@ -37,9 +37,9 @@ export default function ForgotPasswordPage() {
             <form onSubmit={onSubmit} className="mt-6 space-y-3">
               <Input name="email" type="email" placeholder="you@example.com" required autoComplete="email" />
               {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full" disabled={pending}>
+              <SubmitButton className="w-full" disabled={pending}>
                 {pending ? "Sending…" : "Send reset link"}
-              </Button>
+              </SubmitButton>
             </form>
           </>
         )}

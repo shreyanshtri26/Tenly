@@ -14,7 +14,7 @@ export default function DashboardPage() {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12">
       <h1 className="text-2xl font-semibold tracking-tight">Your organizations</h1>
-      <Suspense fallback={<p className="mt-6 text-muted-foreground">Loading…</p>}>
+      <Suspense fallback={<div className="mt-6 grid gap-4 sm:grid-cols-2"><div className="h-24 animate-pulse rounded-md bg-secondary" /><div className="h-24 animate-pulse rounded-md bg-secondary" /></div>}>
         <OrgList />
       </Suspense>
     </main>

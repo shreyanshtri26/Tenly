@@ -1,6 +1,6 @@
+import { SubmitButton } from "@/components/submit-button";
 import { connection } from "next/server";
 import { ErrorNotice } from "@/components/org-nav";
-import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { requireUser } from "@/lib/session";
@@ -22,9 +22,9 @@ export default async function NewOrgPage({ searchParams }: { searchParams: Promi
         <ErrorNotice message={error} />
         <form action={createOrgAction} className="mt-6 space-y-3">
           <Input name="name" placeholder="Organization name" required minLength={2} maxLength={80} />
-          <Button type="submit" className="w-full">
+          <SubmitButton className="w-full">
             Create organization
-          </Button>
+          </SubmitButton>
         </form>
       </Card>
     </main>

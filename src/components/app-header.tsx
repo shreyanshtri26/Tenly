@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { auth } from "@/lib/auth";
+import { getSessionUser } from "@/lib/session";
 import { SignOutButton } from "@/components/sign-out-button";
 
 // Shown on every page. Reads the session only (no database writes).
 export async function AppHeader() {
-  const { data } = await auth.getSession();
-  const user = data?.user;
+  const user = await getSessionUser();
 
   return (
     <header className="border-b">

@@ -1,5 +1,6 @@
 "use client";
 
+import { SubmitButton } from "@/components/submit-button";
 import { useState, type FormEvent } from "react";
 import type { Role } from "@/generated/prisma/enums";
 import { selectClassName } from "@/components/org-nav";
@@ -38,9 +39,9 @@ export function ApiKeyForm({ slug, role }: { slug: string; role: Role }) {
           <option value="MEMBER">member</option>
           {role !== "MEMBER" && <option value="ADMIN">admin</option>}
         </select>
-        <Button type="submit" disabled={pending}>
+        <SubmitButton disabled={pending}>
           {pending ? "Creating…" : "Create key"}
-        </Button>
+        </SubmitButton>
       </form>
 
       {error && <p className="text-sm text-destructive">{error}</p>}

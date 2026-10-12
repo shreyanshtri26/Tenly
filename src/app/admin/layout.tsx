@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { PageSkeleton } from "@/components/skeleton";
 
 // Read-only operator console for super admins. Every page here reads the
 // request, so it streams in behind this boundary (required with Cache Components).
@@ -20,7 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
         </div>
       </nav>
-      <Suspense fallback={<p className="p-8 text-sm text-muted-foreground">Loading…</p>}>{children}</Suspense>
+      <Suspense fallback={<PageSkeleton />}>{children}</Suspense>
     </div>
   );
 }

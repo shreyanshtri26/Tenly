@@ -1,11 +1,11 @@
 "use client";
 
+import { SubmitButton } from "@/components/submit-button";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { signIn, signUp } from "@/lib/auth-client";
 
 // Where to go after signing in: the ?next= path if it is one of ours, else the dashboard.
 function nextPath(): string {
@@ -27,6 +27,8 @@ export function SignInForm() {
     const email = String(form.get("email"));
     const password = String(form.get("password"));
 
+    // Loaded on submit, so the page itself stays light.
+    const { signIn, signUp } = await import("@/lib/auth-client");
     const result =
       mode === "sign-in"
         ? await signIn.email({ email, password })
@@ -58,15 +60,18 @@ export function SignInForm() {
             autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
           />
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={pending}>
+          <SubmitButton className="w-full" disabled={pending}>
             {pending ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}
-          </Button>
+          </SubmitButton>
         </form>
 
         <Button
           variant="outline"
           className="mt-3 w-full"
-          onClick={() => signIn.social({ provider: "google", callbackURL: nextPath() })}
+          onClick={async () => {
+            const { signIn } = await import("@/lib/auth-client");
+            await signIn.social({ provider: "google", callbackURL: nextPath() });
+          }}
         >
           Continue with Google
         </Button>

@@ -1,6 +1,6 @@
+import { SubmitButton } from "@/components/submit-button";
 import { connection } from "next/server";
 import { ErrorNotice, OrgNav } from "@/components/org-nav";
-import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { PLANS } from "@/lib/plans";
 import { can } from "@/lib/rbac";
@@ -51,9 +51,9 @@ export default async function BillingPage({
         </CardDescription>
         {active && canManage && !subscription?.cancelAtPeriodEnd && (
           <form action={cancelSubscriptionAction.bind(null, slug)} className="mt-4">
-            <Button type="submit" variant="outline" size="sm">
+            <SubmitButton variant="outline" size="sm">
               Cancel at period end
-            </Button>
+            </SubmitButton>
           </form>
         )}
       </Card>
@@ -68,9 +68,9 @@ export default async function BillingPage({
               </CardDescription>
               <form action={startCheckoutAction.bind(null, slug)} className="mt-4">
                 <input type="hidden" name="plan" value={plan} />
-                <Button type="submit" className="w-full" disabled={ctx.plan === plan && active}>
+                <SubmitButton className="w-full" disabled={ctx.plan === plan && active}>
                   {ctx.plan === plan && active ? "Current plan" : `Choose ${PLANS[plan].name}`}
-                </Button>
+                </SubmitButton>
               </form>
             </Card>
           ))}

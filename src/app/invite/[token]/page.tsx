@@ -1,9 +1,9 @@
+import { SubmitButton } from "@/components/submit-button";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { prisma } from "@/lib/db";
 import { ErrorNotice } from "@/components/org-nav";
-import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { sha256 } from "@/lib/crypto";
 import { getSessionUser } from "@/lib/session";
@@ -66,9 +66,9 @@ async function InviteContent({ params, searchParams }: Props) {
       <CardDescription className="mt-2">You will join as {invite.role.toLowerCase()}.</CardDescription>
       <ErrorNotice message={error} />
       <form action={acceptInviteAction.bind(null, token)} className="mt-6">
-        <Button type="submit" className="w-full">
+        <SubmitButton className="w-full">
           Accept invite
-        </Button>
+        </SubmitButton>
       </form>
       <p className="mt-4 text-center text-sm">
         <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">

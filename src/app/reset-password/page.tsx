@@ -1,9 +1,9 @@
 "use client";
 
+import { SubmitButton } from "@/components/submit-button";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
@@ -48,9 +48,9 @@ function ResetForm() {
     <form onSubmit={onSubmit} className="mt-6 space-y-3">
       <Input name="password" type="password" placeholder="New password (8+ characters)" minLength={8} required autoComplete="new-password" />
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <Button type="submit" className="w-full" disabled={pending}>
+      <SubmitButton className="w-full" disabled={pending}>
         {pending ? "Saving…" : "Set new password"}
-      </Button>
+      </SubmitButton>
     </form>
   );
 }
@@ -60,7 +60,7 @@ export default function ResetPasswordPage() {
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-4 py-16">
       <Card>
         <CardTitle className="text-xl">Choose a new password</CardTitle>
-        <Suspense fallback={<CardDescription className="mt-2">Loading…</CardDescription>}>
+        <Suspense fallback={<div className="mt-6 h-40 animate-pulse rounded-md bg-secondary" />}>
           <ResetForm />
         </Suspense>
       </Card>

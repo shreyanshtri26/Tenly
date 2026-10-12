@@ -1,10 +1,10 @@
+import { SubmitButton } from "@/components/submit-button";
 import { connection } from "next/server";
 import { can } from "@/lib/rbac";
 import { requireOrgPage } from "@/lib/session";
 import { getUsage, listProjects } from "@/lib/tools";
 import { createProjectAction, deleteProjectAction } from "../actions";
 import { ErrorNotice, OrgNav } from "@/components/org-nav";
-import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
@@ -67,9 +67,9 @@ export default async function OrgOverviewPage({
                   {can(ctx.role, "project:delete") && (
                     <form action={deleteProjectAction.bind(null, slug)}>
                       <input type="hidden" name="id" value={project.id} />
-                      <Button type="submit" variant="ghost" size="sm" className="text-destructive">
+                      <SubmitButton variant="ghost" size="sm" className="text-destructive">
                         Delete
-                      </Button>
+                      </SubmitButton>
                     </form>
                   )}
                 </li>
@@ -84,9 +84,9 @@ export default async function OrgOverviewPage({
             <form action={createProjectAction.bind(null, slug)} className="mt-4 space-y-3">
               <Input name="name" placeholder="Project name" required maxLength={80} />
               <Input name="description" placeholder="Description (optional)" maxLength={500} />
-              <Button type="submit" className="w-full">
+              <SubmitButton className="w-full">
                 Create project
-              </Button>
+              </SubmitButton>
             </form>
           </Card>
         )}
