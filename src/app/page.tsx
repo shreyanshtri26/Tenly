@@ -7,31 +7,37 @@ const FEATURES = [
   {
     icon: Building2,
     title: "Organizations",
+    href: "/features#organizations",
     text: "Every row belongs to one org. Queries are scoped automatically, so tenants never see each other's data.",
   },
   {
     icon: KeyRound,
     title: "Roles and permissions",
+    href: "/features#roles",
     text: "Owner, Admin and Member, checked through one permission table on every request.",
   },
   {
     icon: CreditCard,
     title: "Subscriptions",
+    href: "/features#subscriptions",
     text: "Razorpay plans with signed, idempotent webhooks. A retried payment event is applied exactly once.",
   },
   {
     icon: Gauge,
     title: "Usage limits",
+    href: "/features#usage",
     text: "Each plan sets limits. Users get a warning at 80% and a clear block at 100%.",
   },
   {
     icon: Bot,
     title: "MCP server",
+    href: "/features#mcp",
     text: "Claude and other agents can use Tenly through MCP, with the same permissions as the person behind them.",
   },
   {
     icon: ScrollText,
     title: "Audit log",
+    href: "/features#audit",
     text: "Invites, role changes, plan changes and deletions are recorded with who did what and when.",
   },
 ];
@@ -62,12 +68,15 @@ export default function Home() {
       </section>
 
       <section className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map(({ icon: Icon, title, text }) => (
-          <Card key={title}>
-            <Icon className="size-5 text-accent" aria-hidden />
-            <CardTitle className="mt-4">{title}</CardTitle>
-            <CardDescription className="mt-2">{text}</CardDescription>
-          </Card>
+        {FEATURES.map(({ icon: Icon, title, text, href }) => (
+          <Link key={title} href={href} className="group block">
+            <Card className="h-full transition-colors group-hover:bg-secondary/50">
+              <Icon className="size-5 text-accent" aria-hidden />
+              <CardTitle className="mt-4">{title}</CardTitle>
+              <CardDescription className="mt-2">{text}</CardDescription>
+              <span className="mt-4 inline-block text-sm font-medium text-accent">Learn more →</span>
+            </Card>
+          </Link>
         ))}
       </section>
     </main>

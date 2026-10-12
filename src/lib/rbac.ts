@@ -38,6 +38,11 @@ const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   MEMBER: ["project:read", "project:create", "member:read"],
 };
 
+/** The permissions a role has. Used by the public features page, so it always matches the rules. */
+export function permissionsFor(role: Role): readonly Permission[] {
+  return ROLE_PERMISSIONS[role];
+}
+
 export function can(role: Role, permission: Permission): boolean {
   return ROLE_PERMISSIONS[role].includes(permission);
 }
