@@ -46,7 +46,10 @@ function load(): Env {
         }
       : process.env;
 
-  const parsed = schema.safeParse(source);
+  // Blank values (KEY="" in .env) count as unset, so optional URLs don't fail.
+  const nonEmpty = Object.fromEntries(Object.entries(source).filter(([, v]) => v !== ""));
+
+  const parsed = schema.safeParse(nonEmpty);
   if (!parsed.success) {
     const issues = parsed.error.issues
       .map((i) => `  - ${i.path.join(".")}: ${i.message}`)
