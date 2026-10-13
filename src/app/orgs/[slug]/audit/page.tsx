@@ -14,7 +14,7 @@ export default async function AuditPage({ params }: { params: Promise<{ slug: st
     return (
       <main className="mx-auto w-full max-w-4xl px-4 py-10">
         <h1 className="text-2xl font-semibold tracking-tight">Audit log</h1>
-        <OrgNav slug={slug} />
+        <OrgNav slug={slug} role={ctx.role} />
         <p className="mt-6 text-sm text-muted-foreground">Your role ({ctx.role.toLowerCase()}) cannot view this page.</p>
       </main>
     );
@@ -25,7 +25,7 @@ export default async function AuditPage({ params }: { params: Promise<{ slug: st
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
       <h1 className="text-2xl font-semibold tracking-tight">Audit log</h1>
-      <OrgNav slug={slug} />
+      <OrgNav slug={slug} role={ctx.role} />
       <p className="mt-4 text-sm text-muted-foreground">The 100 most recent changes in this organization.</p>
       <div className="mt-6 overflow-x-auto rounded-md border">
         <table className="w-full text-left text-sm">

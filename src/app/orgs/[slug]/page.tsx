@@ -32,7 +32,7 @@ export default async function OrgOverviewPage({
       <p className="mt-1 text-sm text-muted-foreground">
         {usage.plan} plan · You are {ctx.role.toLowerCase()}
       </p>
-      <OrgNav slug={slug} />
+      <OrgNav slug={slug} role={ctx.role} />
       <ErrorNotice message={error} />
 
       <section className="mt-8 grid gap-4 sm:grid-cols-3">

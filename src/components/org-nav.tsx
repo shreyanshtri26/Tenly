@@ -1,18 +1,22 @@
 import Link from "next/link";
+import type { Role } from "@/generated/prisma/enums";
+import { can, type Permission } from "@/lib/rbac";
 
-const LINKS = [
-  ["", "Overview"],
-  ["/members", "Members"],
-  ["/billing", "Billing"],
-  ["/keys", "API keys"],
-  ["/audit", "Audit log"],
-  ["/assistant", "Ask Tenly"],
-] as const;
+// Each link is shown only if the role can use its page. The pages still check
+// permissions themselves; this only keeps members from seeing dead links.
+const LINKS: ReadonlyArray<readonly [string, string, Permission | null]> = [
+  ["", "Overview", null],
+  ["/members", "Members", "member:read"],
+  ["/billing", "Billing", "billing:read"],
+  ["/keys", "API keys", "apikey:manage"],
+  ["/audit", "Audit log", "audit:read"],
+  ["/assistant", "Ask Tenly", null],
+];
 
-export function OrgNav({ slug }: { slug: string }) {
+export function OrgNav({ slug, role }: { slug: string; role: Role }) {
   return (
     <nav className="mt-4 flex flex-wrap gap-1 text-sm">
-      {LINKS.map(([path, label]) => (
+      {LINKS.filter(([, , permission]) => !permission || can(role, permission)).map(([path, label]) => (
         <Link
           key={label}
           href={`/orgs/${slug}${path}`}

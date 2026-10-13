@@ -96,13 +96,20 @@ export async function listUserOrgs(userId: string) {
   });
 }
 
-/** For pages under /orgs/[slug]: redirects to sign-in or 404s instead of throwing. */
+/**
+ * For pages under /orgs/[slug]: redirects to sign-in or 404s instead of throwing.
+ * A super admin who is not a member is sent to the read-only admin view of the org.
+ */
 export async function requireOrgPage(slug: string): Promise<OrgContext> {
   try {
     return await requireOrgContext(slug);
   } catch (error) {
     if (error instanceof UnauthorizedError) redirect(`/sign-in?next=${encodeURIComponent(`/orgs/${slug}`)}`);
-    if (error instanceof NotFoundError) notFound();
+    if (error instanceof NotFoundError) {
+      const user = await getSessionUser();
+      if (user && (await isSuperAdminUser(user.id))) redirect(`/admin/orgs/${slug}`);
+      notFound();
+    }
     throw error;
   }
 }

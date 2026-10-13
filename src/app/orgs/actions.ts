@@ -46,6 +46,9 @@ async function attempt(path: string, work: () => Promise<unknown>) {
 // Organizations
 // ---------------------------------------------------------------------------
 
+// Prisma's default is 5s, which a cold Neon compute can exceed. ponytail: raise again if commits still expire.
+const TX_OPTIONS = { timeout: 15_000 };
+
 export async function createOrgAction(form: FormData) {
   const user = await requireUser();
   const name = text(form, "name").trim();
@@ -58,7 +61,7 @@ export async function createOrgAction(form: FormData) {
     await tx.auditLog.create({
       data: { orgId: org.id, actorUserId: user.id, action: "org.created", targetType: "organization", targetId: org.id },
     });
-  });
+  }, TX_OPTIONS);
   redirect(`/orgs/${slug}`);
 }
 
@@ -196,7 +199,7 @@ export async function acceptInviteAction(token: string) {
         metadata: { role: invite.role },
       },
     });
-  });
+  }, TX_OPTIONS);
   redirect(`/orgs/${invite.org.slug}`);
 }
 
