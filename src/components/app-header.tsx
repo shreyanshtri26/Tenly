@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
 import { NavLink } from "@/components/nav-link";
 import { SignOutButton } from "@/components/sign-out-button";
+import { OrgMenu } from "@/components/org-menu";
 import { getSessionUser, isSuperAdminUser } from "@/lib/session";
 
 // Shown on every page. Sticky, so the navigation stays in reach while scrolling.
@@ -25,6 +26,7 @@ export async function AppHeader() {
           {user ? (
             <>
               <span aria-hidden className="mx-2 hidden h-4 w-px bg-border sm:inline-block" />
+              <OrgMenu userId={user.id} />
               <span className="hidden max-w-40 truncate px-2 text-muted-foreground md:inline">{user.name}</span>
               <SignOutButton />
             </>

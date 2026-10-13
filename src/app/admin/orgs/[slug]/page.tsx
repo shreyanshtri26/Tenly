@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireSuperAdminPage } from "@/lib/session";
+import { changePlanAction } from "@/app/admin/actions";
+import { SubmitButton } from "@/components/submit-button";
+import { selectClassName } from "@/components/org-nav";
+import { PLANS } from "@/lib/plans";
 
 export const metadata = { title: "Super admin · Organization" };
 
@@ -38,6 +42,21 @@ export default async function AdminOrgDetailPage({ params }: { params: Promise<{
         </Link>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">{org.name}</h1>
         <p className="mt-1 font-mono text-xs text-muted-foreground">{org.slug}</p>
+        <form action={changePlanAction.bind(null, org.slug)} className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+          <label htmlFor="plan" className="text-muted-foreground">
+            Plan
+          </label>
+          <select id="plan" name="plan" defaultValue={org.plan} className={selectClassName}>
+            {(Object.keys(PLANS) as (keyof typeof PLANS)[]).map((p) => (
+              <option key={p} value={p}>
+                {PLANS[p].name}
+              </option>
+            ))}
+          </select>
+          <SubmitButton pendingText="Saving…" className="h-9 rounded-md border px-3 text-sm hover:bg-secondary">
+            Change plan
+          </SubmitButton>
+        </form>
         <p className="mt-3 text-sm">
           Plan <strong>{org.plan}</strong>
           {org.subscription && (

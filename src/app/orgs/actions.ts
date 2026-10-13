@@ -62,6 +62,8 @@ export async function createOrgAction(form: FormData) {
       data: { orgId: org.id, actorUserId: user.id, action: "org.created", targetType: "organization", targetId: org.id },
     });
   }, TX_OPTIONS);
+  // The navbar lists the user's organizations, so refresh the shared layout too.
+  revalidatePath("/", "layout");
   redirect(`/orgs/${slug}`);
 }
 
@@ -200,6 +202,7 @@ export async function acceptInviteAction(token: string) {
       },
     });
   }, TX_OPTIONS);
+  revalidatePath("/", "layout");
   redirect(`/orgs/${invite.org.slug}`);
 }
 
