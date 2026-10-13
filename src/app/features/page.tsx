@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { AUDIT_ACTIONS } from "@/lib/audit";
 import { PLANS, type Metric } from "@/lib/plans";
 import { permissionsFor, PERMISSIONS } from "@/lib/rbac";
+import { getSessionUser } from "@/lib/session";
 import { TOOLS } from "@/lib/tools";
 
 export const metadata = { title: "Features" };
@@ -32,6 +35,28 @@ function limit(value: number) {
   return Number.isFinite(value) ? value.toLocaleString("en-IN") : "Unlimited";
 }
 
+// The sign-in state is per visit, so this part streams in behind a Suspense boundary.
+async function StartButtons() {
+  await connection();
+  const user = await getSessionUser();
+  return (
+    <div className="mt-6 flex flex-wrap gap-3">
+      {user ? (
+        <Link href="/dashboard" className={buttonVariants()}>
+          Go to dashboard
+        </Link>
+      ) : (
+        <Link href="/sign-in" className={buttonVariants()}>
+          Sign in
+        </Link>
+      )}
+      <Link href="/orgs/new" className={buttonVariants({ variant: "outline" })}>
+        Create an organization
+      </Link>
+    </div>
+  );
+}
+
 export default function FeaturesPage() {
   return (
     <main className="mx-auto w-full max-w-5xl space-y-16 px-4 py-16">
@@ -41,17 +66,12 @@ export default function FeaturesPage() {
         </Link>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight">Features</h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Everything on the home page, with the real rules from the code. Sign in and create an organization to try it
+          Everything on the home page, with the real rules from the code. Use the buttons below to try it
           yourself.
         </p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/sign-in" className={buttonVariants()}>
-            Sign in
-          </Link>
-          <Link href="/orgs/new" className={buttonVariants({ variant: "outline" })}>
-            Create an organization
-          </Link>
-        </div>
+        <Suspense fallback={<div className="mt-6 h-10" />}>
+          <StartButtons />
+        </Suspense>
       </header>
 
       <section id="organizations" className="scroll-mt-20">
